@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useState } from 'react'
+import { useState } from 'react'
 import css from 'components/ImageGalleryItem/ImageGalleryItem.module.css'
 import { Modal } from 'components/Modal/Modal'
 
