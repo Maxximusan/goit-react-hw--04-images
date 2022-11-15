@@ -1,25 +1,20 @@
 import PropTypes from "prop-types";
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import css from 'components/ImageGalleryItem/ImageGalleryItem.module.css'
 import { Modal } from 'components/Modal/Modal'
 
 
 
-export class ImageGalleryItem extends Component {
+export const ImageGalleryItem = (props) => {
 
-    state = {
-        showModal: false,
-    }
+    const {id, webformatURL, largeImageURL, alt} = props
 
-    toggleModal = () => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-     
-    }))
-    }
+    const [showModal, setShowModal] = useState(false)
+   
+
+    const toggleModal = () => setShowModal(prevState => !prevState)
     
-    render() {
-const {id, webformatURL, largeImageURL, alt} = this.props
+    
 
     return (
         <li key={id} className={css.ImageGalleryItem}>
@@ -27,12 +22,12 @@ const {id, webformatURL, largeImageURL, alt} = this.props
                 className={css.ImageGalleryItem__image}
                 src={webformatURL}
                 alt={alt}
-                onClick={this.toggleModal}
+                onClick={toggleModal}
                  />
-            {this.state.showModal && <Modal onClickModal={this.toggleModal} src={ largeImageURL } alt={alt} />}
+            {showModal && <Modal onClickModal={toggleModal} src={ largeImageURL } alt={alt} />}
 </li>
     )
-}
+
 }
 
 ImageGalleryItem.propTypes = {
