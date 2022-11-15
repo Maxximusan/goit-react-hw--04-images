@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { apiFetchGallery } from 'Api/ApiPixabay'
 import { Searchbar } from 'components/Searchbar/Searchbar'
@@ -10,96 +10,87 @@ import { ErrorReject } from 'components/ErrorRjected'
 
 
 
-export class App extends React.Component {
-  state = {
-   
-    searchQuery: '',
-    page: 1,
-    images: [],
-    totalHits: 0,
-    error: '',
-    isLoading: false,
-    
-  }
+export const App = () => {
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [totalHits, setTotalHits] = useState(0);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+ 
   
   
-  componentDidUpdate(prevProps, prevState) { 
-    const prevImages = prevState.searchQuery;
-    const nextImages = this.state.searchQuery;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
+  useEffect(() => {
     
 
-    if (prevImages !== nextImages || prevPage !== nextPage) {
-      
-      this.fetchGallery(nextImages, nextPage);
+    if (searchQuery === '') {
+      return;
     }
 
     
-     if (this.state.error.length > 0 ) {
-        toast.error(this.state.error)
-        }
-    
-  }
-  
-  fetchGallery(nextImages, nextPage) {
-    apiFetchGallery(nextImages, nextPage)
+
+     apiFetchGallery(searchQuery, page)
       .then(
         (result) => {
              
-          this.setState(prevState => {
-            return {
-              isLoading: false,
-              images: [...prevState.images, ...result.data.hits],
-              totalHits: result.data.totalHits,
-              
-            };
-
-          });
+          setImages(prevState => [...prevState, ...result.data.hits]);
+          setTotalHits(result.data.totalHits);
+          setIsLoading(false);
+          
           if (result.data.totalHits === 0) {
             throw new Error ('Nothing found for your request, please, try again something else')
           }
                      
         })
-    .catch(error => this.setState({error: error.message}) )
-
-  }
-
-
-  onSubmit = searchQuery => {
-   
-    this.setState({ searchQuery, page: 1, isLoading: true, error:'', images: []});
-    console.log(searchQuery);
+      .catch(error => toast.error(error.message)) 
+        
     
- };
+    // .catch(error => setError(error.message))
+    
+    // if (error.length > 0) {
+    //   toast.error(error)
+    // };
 
-  onLoadMore = () => {
-     this.setState(prevState => ({
-       page: prevState.page + 1,
-       isLoading: true
-    }));
-  }
-
+  }, [page, searchQuery]);
   
   
-  render() {
-    const { images, error, totalHits, isLoading,} = this.state
+
+
+  const onSubmit = searchQuery => {
+   
+    setSearchQuery(searchQuery);
+    setPage(1);
+    setIsLoading(true);
+    setError('');
+    setImages([]);
+    console.log(searchQuery);
+  };
+    
+    
+ 
+
+  const onLoadMore = () => {
+    setPage(prevState => prevState + 1);
+    setIsLoading(true);
+    };
+    
   
       
     return (
       <div className={css.App}>
          
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={onSubmit} />
         <ErrorReject errorMessage={error} />
         <ImageGallery images={images} />
         
         { isLoading && <Loader />}
         {images.length !== totalHits && !isLoading && (
-          <Button loadMore={this.onLoadMore} />)}
+          <Button loadMore={onLoadMore} />)}
         
     </div>
       );
-      }
+      
   
 };
 
